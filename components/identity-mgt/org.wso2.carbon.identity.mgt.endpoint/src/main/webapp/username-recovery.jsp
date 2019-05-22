@@ -208,8 +208,7 @@
                             <%}%>
 
                             <%
-                                String callback = Encode.forHtmlAttribute
-                                        (request.getParameter("callback"));
+                                String callback = request.getParameter("callback");
 
                                 if (StringUtils.isBlank(callback)) {
                                     callback = IdentityManagementEndpointUtil.getUserPortalUrl(
@@ -219,7 +218,7 @@
                                 if (callback != null) {
                             %>
                             <div>
-                                <input type="hidden" name="callback" value="<%=callback %>"/>
+                                <input type="hidden" name="callback" value="<%=Encode.forHtmlAttribute(callback) %>"/>
                             </div>
                             <%
                                 }
@@ -238,7 +237,7 @@
                                 if (StringUtils.isNotEmpty(tenantDomain) && !error) {
                             %>
                             <div>
-                                <input type="hidden" name="tenantDomain" value="<%=tenantDomain %>"/>
+                                <input type="hidden" name="tenantDomain" value="<%=Encode.forHtmlAttribute(tenantDomain)%>"/>
                             </div>
                             <%
                             } else {

@@ -25,7 +25,6 @@ import org.wso2.carbon.identity.application.common.model.ApplicationBasicInfo;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.application.common.model.InboundAuthenticationRequestConfig;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
-import org.wso2.carbon.identity.application.mgt.dao.ApplicationDAO;
 import org.wso2.carbon.identity.application.mgt.internal.ApplicationManagementServiceComponent;
 
 import java.util.ArrayList;
@@ -141,6 +140,10 @@ public class FileBasedApplicationDAO extends AbstractApplicationDAOImpl {
     @Override
     public String getServiceProviderNameByClientId(String clientId, String clientType,
                                                    String tenantDomain) throws IdentityApplicationManagementException {
+
+        if (StringUtils.isEmpty(clientId)) {
+            return null;
+        }
 
         Map<String, ServiceProvider> spMap = ApplicationManagementServiceComponent
                 .getFileBasedSPs();

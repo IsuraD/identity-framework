@@ -36,6 +36,7 @@ public abstract class FrameworkConstants {
     public static final String ACCOUNT_LOCKED_CLAIM_URI = "http://wso2.org/claims/identity/accountLocked";
     public static final String ACCOUNT_DISABLED_CLAIM_URI = "http://wso2.org/claims/identity/accountDisabled";
     public static final String ACCOUNT_UNLOCK_TIME_CLAIM = "http://wso2.org/claims/identity/unlockTime";
+    public static final String USERNAME_CLAIM = "http://wso2.org/claims/username";
     public static final String UNFILTERED_LOCAL_CLAIM_VALUES = "UNFILTERED_LOCAL_CLAIM_VALUES";
     public static final String UNFILTERED_IDP_CLAIM_VALUES = "UNFILTERED_IDP_CLAIM_VALUES";
     public static final String UNFILTERED_SP_CLAIM_VALUES = "UNFILTERED_SP_CLAIM_VALUES";
@@ -123,6 +124,9 @@ public abstract class FrameworkConstants {
     public static final String AUTH_MECHANISM = "AuthMechanism";
     public static final String PASSWORD_PROPERTY = "PASSWORD_PROPERTY";
 
+    public static final String FEDERATED_IDP_ROLE_CLAIM_VALUE_SEPARATOR =
+            "FederatedIDPRoleClaimValueAttributeSeparator";
+
     private FrameworkConstants() {
 
     }
@@ -205,6 +209,12 @@ public abstract class FrameworkConstants {
         public static final String QNAME_EXT_PROVISIONING_HANDLER = "ProvisioningHandler";
         public static final String QNAME_EXT_AUTHORIZATION_HANDLER = "AuthorizationHandler";
         public static final String QNAME_EXT_POST_AUTHENTICATION_HANDLER = "PostAuthenticationHandler";
+
+        /**
+         * Configuration used for user session mapping.
+         */
+        public static final String USER_SESSION_MAPPING_ENABLED =
+                "JDBCPersistenceManager.SessionDataPersist.UserSessionMapping.Enable";
 
         private Config() {
         }
