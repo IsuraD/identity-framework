@@ -35,8 +35,6 @@ import com.sun.jersey.multipart.FormDataMultiPart;
 import com.sun.jersey.multipart.file.FileDataBodyPart;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.mgt.endpoint.IdentityManagementEndpointConstants;
 import org.wso2.carbon.identity.mgt.endpoint.IdentityManagementEndpointUtil;
 import org.wso2.carbon.identity.mgt.endpoint.IdentityManagementServiceUtil;
@@ -443,7 +441,15 @@ public class ApiClient {
         return url.toString();
     }
 
-    private ClientResponse getAPIResponse(String path, String method, List<Pair> queryParams, Object body, Map<String, String> headerParams, Map<String, Object> formParams, String accept, String contentType, String[] authNames) throws ApiException {
+    private ClientResponse getAPIResponse(String path,
+                                          String method,
+                                          List<Pair> queryParams,
+                                          Object body,
+                                          Map<String, String> headerParams,
+                                          Map<String, Object> formParams,
+                                          String accept,
+                                          String contentType,
+                                          String[] authNames) throws ApiException {
 
         if (body != null && !formParams.isEmpty()) {
             throw new ApiException(500, "Cannot have body and form params");
