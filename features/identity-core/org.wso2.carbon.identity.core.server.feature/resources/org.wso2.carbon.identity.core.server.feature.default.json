@@ -8,6 +8,7 @@
   "session_data.persistence.enable_persistance": true,
   "session_data.persistence.persistance_pool_size": "0",
   "session_data.persistence.persist_temporary_data": true,
+  "session_data.persistence.enable_user_session_mapping": true,
   "session_data.cleanup.enable_expired_data_cleanup": true,
   "session_data.cleanup.expire_session_data_after": "$ref{session.timeout.remember_me_session_timeout}",
   "session_data.cleanup.expire_pre_session_data_after": "40m",
@@ -21,6 +22,7 @@
   "key_mgt.keystore_dir": "${carbon.home}/conf/keystores",
   "key_mgt.key_manager_type": "SunX509",
   "key_mgt.trust_manager_type": "SunX509",
+  "key_mgt.userstore_password_encryption": "InternalKeyStore",
   "identity.issuer_policy": "SelfAndManaged",
   "identity.token_validation_policy": "CertValidate",
 
@@ -424,5 +426,10 @@
   "authentication.adaptive.long_wait.prompt": false,
 
   "federated.idp.role_claim_value_attribute_separator": ",",
-  "configuration.store.query_length.max": "4194304"
+  "configuration.store.query_length.max": "4194304",
+
+  "fido.webauthn.enable": true,
+  "fido.trusted.origins": [
+    "${carbon.protocol}://${carbon.host}:${carbon.management.port}"
+  ]
 }
