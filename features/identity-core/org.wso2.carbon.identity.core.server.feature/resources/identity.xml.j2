@@ -28,9 +28,9 @@
             following property to "true". -->
         <SkipDBSchemaCreation>{{identity_data_source.skip_db_schema_creation}}</SkipDBSchemaCreation>
         <SessionDataPersist>
-            <Enable>{{session_data.persistence.enable_persistance}}</Enable>
+            <Enable>{{session_data.persistence.enable_persistence}}</Enable>
             <Temporary>{{session_data.persistence.persist_temporary_data}}</Temporary>
-            <PoolSize>{{session_data.persistence.persistance_pool_size}}</PoolSize>
+            <PoolSize>{{session_data.persistence.persistence_pool_size}}</PoolSize>
             <SessionDataCleanUp>
                 <Enable>{{session_data.cleanup.enable_expired_data_cleanup}}</Enable>
                 <CleanUpTimeout>{{session_data.cleanup.expire_session_data_after}}</CleanUpTimeout>
@@ -148,8 +148,8 @@
              Default: org.wso2.carbon.identity.oauth2.token.OauthTokenIssuerImpl.
              Applicable values: org.wso2.carbon.identity.oauth2.token.JWTTokenIssuer
         -->
-        {% if oauth.extension.token_generator is defined%}
-        <IdentityOAuthTokenGenerator>{{oauth.extension.token_generator}}</IdentityOAuthTokenGenerator>
+        {% if oauth.extensions.token_generator is defined%}
+        <IdentityOAuthTokenGenerator>{{oauth.extensions.token_generator}}</IdentityOAuthTokenGenerator>
         {% else %}
         <IdentityOAuthTokenGenerator>org.wso2.carbon.identity.oauth2.token.OauthTokenIssuerImpl</IdentityOAuthTokenGenerator>
         {% endif %}
@@ -167,8 +167,8 @@
              Applicable values: org.apache.oltu.oauth2.as.issuer.UUIDValueGenerator,
                                 org.apache.oltu.oauth2.as.issuer.MD5Generator,
                                 org.wso2.carbon.identity.oauth.tokenvaluegenerator.SHA256Generator-->
-        {% if oauth.extension.token_value_generator is defined %}
-        <AccessTokenValueGenerator>{{oauth.extension.token_value_generator}}</AccessTokenValueGenerator>
+        {% if oauth.extensions.token_value_generator is defined %}
+        <AccessTokenValueGenerator>{{oauth.extensions.token_value_generator}}</AccessTokenValueGenerator>
         {% else %}
         <AccessTokenValueGenerator>org.apache.oltu.oauth2.as.issuer.UUIDValueGenerator</AccessTokenValueGenerator>
         {% endif %}
@@ -223,8 +223,8 @@
         <!-- Enable renewal of refresh token for refresh_token grant -->
         <RenewRefreshTokenForRefreshGrant>{{oauth.token_renewal.renew_refresh_token}}</RenewRefreshTokenForRefreshGrant>
         <!-- Process the token before storing it in database, e.g. encrypting -->
-        {% if oauth.extensions.token_persistance_processor is defined %}
-        <TokenPersistenceProcessor>{{oauth.extensions.token_persistance_processor}}</TokenPersistenceProcessor>
+        {% if oauth.extensions.token_persistence_processor is defined %}
+        <TokenPersistenceProcessor>{{oauth.extensions.token_persistence_processor}}</TokenPersistenceProcessor>
         {% else %}
         <TokenPersistenceProcessor>org.wso2.carbon.identity.oauth.tokenprocessor.PlainTextPersistenceProcessor</TokenPersistenceProcessor>
         {% endif %}
@@ -528,7 +528,19 @@
             {% if oauth.oidc.id_token.sign_with_sp_key is defined %}
             <SignJWTWithSPKey>{{oauth.oidc.id_token.sign_with_sp_key}}</SignJWTWithSPKey>
             {% else %}
-            <SignJWTWithSPKey>false</SignJWTWithSPKey>
+            <SignJWTWithSPKey>true</SignJWTWithSPKey>
+            {% endif %}
+            <!-- Add tenant domain to 'realm' claim of ID Token-->
+            {% if oauth.oidc.id_token.add_tenant_domain_to_realm is defined %}
+            <AddTenantDomainToIdToken>{{oauth.oidc.id_token.add_tenant_domain_to_realm}}</AddTenantDomainToIdToken>
+            {% else %}
+            <AddTenantDomainToIdToken>false</AddTenantDomainToIdToken>
+            {% endif %}
+            <!-- Add userstore domain to 'realm' claim of ID Token-->
+            % if oauth.oidc.id_token.add_userstore_domain_to_realm is defined %}
+            <AddUserstoreDomainToIdToken>{{oauth.oidc.id_token.add_userstore_domain_to_realm}}</AddUserstoreDomainToIdToken>
+            {% else %}
+            <AddUserstoreDomainToIdToken>false</AddUserstoreDomainToIdToken>
             {% endif %}
             <!--
                 Expiry period of the logout token used in OIDC Back Channel Logout in seconds.
@@ -566,7 +578,7 @@
         <TokenPersistence>
             <Enable>true</Enable>
             <PoolSize>0</PoolSize>
-            <RetryCount>{{oauth.token_generation.retry_count_on_persistance_failures}}</RetryCount>
+            <RetryCount>{{oauth.token_generation.retry_count_on_persistence_failures}}</RetryCount>
         </TokenPersistence>
 
         <!--
@@ -1331,7 +1343,10 @@
         <Resource context="/scim2/ResourceTypes" secured="false" http-method="all">
             <Permissions></Permissions>
         </Resource>
-        <Resource context="/scim2/Bulk(.*)" secured="true"  http-method="all">
+        <Resource context="/scim2/Schemas" secured="true" http-method="all">
+            <Permissions></Permissions>
+        </Resource>
+        <Resource context="(.*)/scim2/Bulk(.*)" secured="true"  http-method="all">
             <Permissions>/permission/admin/manage/identity/usermgt</Permissions>
         </Resource>
         <Resource context="(.*)/api/identity/oauth2/dcr/(.*)" secured="true" http-method="all">
@@ -1367,21 +1382,6 @@
         <Resource context="(.*)/api/users/v1/(.*)" secured="true" http-method="all">
             <Permissions>/permission/admin/manage/identity</Permissions>
         </Resource>
-        <Resource context="(.*)/api/server/v1/claim-dialects(.*)" secured="true" http-method="GET">
-            <Permissions>/permission/admin/manage/identity/claimmgt/metadata/view</Permissions>
-        </Resource>
-        <Resource context="(.*)/api/server/v1/claim-dialects(.*)" secured="true" http-method="POST">
-            <Permissions>/permission/admin/manage/identity/claimmgt/metadata/create</Permissions>
-        </Resource>
-        <Resource context="(.*)/api/server/v1/claim-dialects(.*)" secured="true" http-method="PUT">
-            <Permissions>/permission/admin/manage/identity/claimmgt/metadata/update</Permissions>
-        </Resource>
-        <Resource context="(.*)/api/server/v1/claim-dialects(.*)" secured="true" http-method="DELETE">
-            <Permissions>/permission/admin/manage/identity/claimmgt/metadata/delete</Permissions>
-        </Resource>
-        <Resource context="(.*)/api/server/v1/workflow-engines(.*)" secured="true" http-method="GET">
-            <Permissions>/permission/admin/manage/humantask/viewtasks</Permissions>
-        </Resource>
         <Resource context="(.*)/api/server/v1/(.*)" secured="true" http-method="all">
             <Permissions>/permission/admin/manage/identity/</Permissions>
         </Resource>
@@ -1398,23 +1398,22 @@
         <Resource context="/openid(.*)" secured="false" http-method="all"/>
         <Resource context="/passivests(.*)" secured="false" http-method="all"/>
         <Resource context="/samlartresolve(.*)" secured="false" http-method="all"/>
-        <Resource context="/oauth/request-token(.*)" secured="false" http-method="all"/>
-        <Resource context="/oauth/authorize-url(.*)" secured="false" http-method="all"/>
-        <Resource context="/oauth/access-token(.*)" secured="false" http-method="all"/>
-        <Resource context="/oauth2/token(.*)" secured="false" http-method="all"/>
-        <Resource context="/oauth2/authorize(.*)" secured="false" http-method="all"/>
-        <Resource context="/oauth2/revoke(.*)" secured="false" http-method="all"/>
-        <Resource context="/oauth2/userinfo(.*)" secured="false" http-method="all"/>
-        <Resource context="/oauth2/jwks(.*)" secured="false" http-method="all"/>
-        <Resource context="/oidc/checksession(.*)" secured="false" http-method="all"/>
-        <Resource context="/oidc/logout(.*)" secured="false" http-method="all"/>
-        <Resource context="/oauth2/oidcdiscovery(.*)" secured="false" http-method="all"/>
-        <Resource context="/wso2/scim/Users(.*)" secured="false" http-method="all"/>
-        <Resource context="/wso2/scim/Groups(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/oauth/request-token(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/oauth/authorize-url(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/oauth/access-token(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/oauth2/token(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/oauth2/authorize(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/oauth2/revoke(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/oauth2/userinfo(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/oauth2/jwks(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/oidc/checksession(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/oidc/logout(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/oauth2/oidcdiscovery(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/wso2/scim/Users(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/wso2/scim/Groups(.*)" secured="false" http-method="all"/>
         <Resource context="/authenticationendpoint(.*)" secured="false" http-method="all"/>
         <Resource context="/accountrecoveryendpoint(.*)" secured="false" http-method="all"/>
-        <Resource context="/login-portal(.*)" secured="false" http-method="all"/>
-        <Resource context="/api/health-check/v1(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/api/health-check/v1(.*)" secured="false" http-method="all"/>
         <Resource context="/emailotpauthenticationendpoint(.*)" secured="false" http-method="all"/>
         <Resource context="/mex(.*)" secured="false" http-method="all"/>
         <Resource context="/mexut(.*)" secured="false" http-method="all"/>
@@ -1430,15 +1429,15 @@
         <Resource context="/inweboauthenticationendpoint(.*)" secured="false" http-method="all"/>
         <Resource context="/token2authenticationendpoint(.*)" secured="false" http-method="all"/>
         <Resource context="/duoauthenticationendpoint(.*)" secured="false" http-method="all"/>
-        <Resource context="/fileupload(.*)" secured="false" http-method="all"/>
-        <Resource context="/filedownload(.*)" secured="false" http-method="all"/>
-        <Resource context="/logincontext(.*)" secured="false" http-method="all"/>
-        <Resource context="/registry/resourceContent(.*)" secured="false" http-method="all"/>
-        <Resource context="/registry/resource(.*)" secured="false" http-method="all"/>
-        <Resource context="/registry/tags(.*)" secured="false" http-method="all"/>
-        <Resource context="/registry/atom(.*)" secured="false" http-method="all"/>
-        <Resource context="/tryit/JAXRSRequestXSSproxy_ajaxprocessor.jsp" secured="false" http-method="all"/>
-        <Resource context="/admin/jsp/WSRequestXSSproxy_ajaxprocessor.jsp" secured="false" http-method="all"/>
+        <Resource context="(.*)/fileupload(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/filedownload(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/logincontext(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/registry/resourceContent(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/registry/resource(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/registry/tags(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/registry/atom(.*)" secured="false" http-method="all"/>
+        <Resource context="(.*)/tryit/JAXRSRequestXSSproxy_ajaxprocessor.jsp" secured="false" http-method="all"/>
+        <Resource context="(.*)/admin/jsp/WSRequestXSSproxy_ajaxprocessor.jsp" secured="false" http-method="all"/>
 
         {% for resource in resource.access_control %}
         <Resource context="{{resource.context}}" secured="{{resource.secure}}" http-method="{{resource.http_method}}">
