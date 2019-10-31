@@ -33,6 +33,7 @@ import org.wso2.carbon.identity.application.mgt.cache.IdentityServiceProviderCac
 import org.wso2.carbon.identity.application.mgt.cache.IdentityServiceProviderCacheEntry;
 import org.wso2.carbon.identity.application.mgt.cache.IdentityServiceProviderCacheKey;
 import org.wso2.carbon.identity.application.mgt.dao.ApplicationDAO;
+import org.wso2.carbon.identity.application.mgt.dao.PaginatableFilterableApplicationDAO;
 import org.wso2.carbon.identity.application.mgt.internal.cache.ServiceProviderByIDCache;
 import org.wso2.carbon.identity.application.mgt.internal.cache.ServiceProviderByInboundAuthCache;
 import org.wso2.carbon.identity.application.mgt.internal.cache.ServiceProviderCacheInboundAuthEntry;
@@ -50,7 +51,7 @@ import java.util.Map;
  * Cached DAO layer for the application management. All the DAO access has to be happen through this layer to ensure
  * single point of caching.
  */
-public class CacheBackedApplicationDAO extends AbstractApplicationDAOImpl {
+public class CacheBackedApplicationDAO extends ApplicationDAOImpl {
 
     private static final Log log = LogFactory.getLog(CacheBackedApplicationDAO.class);
 
@@ -192,28 +193,81 @@ public class CacheBackedApplicationDAO extends AbstractApplicationDAOImpl {
 
     public ApplicationBasicInfo[] getApplicationBasicInfo(String filter) throws IdentityApplicationManagementException {
 
-        // No need to cache the returned list.
-        return appDAO.getApplicationBasicInfo(filter);
+        if (appDAO instanceof PaginatableFilterableApplicationDAO) {
+            // No need to cache the returned list.
+            return ((PaginatableFilterableApplicationDAO) appDAO).getApplicationBasicInfo(filter);
+        } else {
+            throw new UnsupportedOperationException("Get application basic info with filter not supported.");
+        }
     }
 
-    public ApplicationBasicInfo[] getAllPaginatedApplicationBasicInfo(int pageNumber) throws IdentityApplicationManagementException {
+    public ApplicationBasicInfo[] getAllPaginatedApplicationBasicInfo(int pageNumber)
+            throws IdentityApplicationManagementException {
 
-        // No need to cache the returned list.
-        return appDAO.getAllPaginatedApplicationBasicInfo(pageNumber);
+        if (appDAO instanceof PaginatableFilterableApplicationDAO) {
+            // No need to cache the returned list.
+            return ((PaginatableFilterableApplicationDAO) appDAO).getAllPaginatedApplicationBasicInfo(pageNumber);
+        } else {
+            throw new UnsupportedOperationException("This operation only supported in" +
+                    " PaginatableFilterableApplicationDAO only.");
+        }
     }
 
-    public ApplicationBasicInfo[] getPaginatedApplicationBasicInfo(int pageNumber, String filter) throws IdentityApplicationManagementException {
+    @Override
+    public ApplicationBasicInfo[] getApplicationBasicInfo(int offset, int limit) throws IdentityApplicationManagementException {
 
-        // No need to cache the returned list.
-        return appDAO.getPaginatedApplicationBasicInfo(pageNumber, filter);
+        if (appDAO instanceof PaginatableFilterableApplicationDAO) {
+            // No need to cache the returned list.
+            return ((PaginatableFilterableApplicationDAO) appDAO).getApplicationBasicInfo(offset, limit);
+        } else {
+            throw new UnsupportedOperationException("This operation only supported in" +
+                    " PaginatableFilterableApplicationDAO only.");
+        }
+    }
+
+    public ApplicationBasicInfo[] getPaginatedApplicationBasicInfo(int pageNumber, String filter)
+            throws IdentityApplicationManagementException {
+
+        if (appDAO instanceof PaginatableFilterableApplicationDAO) {
+            // No need to cache the returned list.
+            return ((PaginatableFilterableApplicationDAO) appDAO).getPaginatedApplicationBasicInfo(pageNumber, filter);
+        } else {
+            throw new UnsupportedOperationException("This operation only supported in" +
+                    " PaginatableFilterableApplicationDAO only.");
+        }
+    }
+
+    @Override
+    public ApplicationBasicInfo[] getApplicationBasicInfo(String filter, int offset, int limit)
+            throws IdentityApplicationManagementException {
+
+        if (appDAO instanceof PaginatableFilterableApplicationDAO) {
+            // No need to cache the returned list.
+            return ((PaginatableFilterableApplicationDAO) appDAO).getApplicationBasicInfo(filter, offset, limit);
+        } else {
+            throw new UnsupportedOperationException("This operation only supported in" +
+                    " PaginatableFilterableApplicationDAO only.");
+        }
     }
 
     public int getCountOfAllApplications() throws IdentityApplicationManagementException {
-        return appDAO.getCountOfAllApplications();
+
+        if (appDAO instanceof PaginatableFilterableApplicationDAO) {
+            return ((PaginatableFilterableApplicationDAO) appDAO).getCountOfAllApplications();
+        } else {
+            throw new UnsupportedOperationException("This operation only supported in" +
+                    " PaginatableFilterableApplicationDAO only.");
+        }
     }
 
     public int getCountOfApplications(String filter) throws IdentityApplicationManagementException {
-        return appDAO.getCountOfApplications(filter);
+
+        if (appDAO instanceof PaginatableFilterableApplicationDAO) {
+            return ((PaginatableFilterableApplicationDAO) appDAO).getCountOfApplications(filter);
+        } else {
+            throw new UnsupportedOperationException("This operation only supported in" +
+                    " PaginatableFilterableApplicationDAO only.");
+        }
     }
 
     public Map<String, String> getServiceProviderToLocalIdPClaimMapping(String serviceProviderName, String
@@ -266,6 +320,49 @@ public class CacheBackedApplicationDAO extends AbstractApplicationDAOImpl {
             return requestedLocalClaims;
         }
         return appDAO.getAllRequestedClaimsByServiceProvider(serviceProviderName, tenantDomain);
+    }
+
+    @Override
+    public ApplicationBasicInfo getApplicationBasicInfoByResourceId(String resourceId, String tenantDomain)
+            throws IdentityApplicationManagementException {
+        // TODO: have a cache.
+        return appDAO.getApplicationBasicInfoByResourceId(resourceId, tenantDomain);
+    }
+
+    @Override
+    public ServiceProvider getApplicationByResourceId(String resourceId,
+                                                  String tenantDomain) throws IdentityApplicationManagementException {
+
+        // TODO: introduce a cache..
+        return appDAO.getApplicationByResourceId(resourceId, tenantDomain);
+    }
+
+    @Override
+    public ServiceProvider addApplication(ServiceProvider application,
+                                      String tenantDomain) throws IdentityApplicationManagementException {
+
+        return appDAO.addApplication(application, tenantDomain);
+    }
+
+    @Override
+    public void updateApplicationByResourceId(String resourceId,
+                                              String tenantDomain,
+                                              ServiceProvider updatedApp) throws IdentityApplicationManagementException {
+
+        ServiceProvider storedApp = getApplicationByResourceId(resourceId, tenantDomain);
+        clearAllAppCache(updatedApp, storedApp.getApplicationName(), tenantDomain);
+
+        appDAO.updateApplicationByResourceId(resourceId, tenantDomain, updatedApp);
+    }
+
+    @Override
+    public void deleteApplicationByResourceId(String resourceId,
+                                              String tenantDomain) throws IdentityApplicationManagementException {
+
+        ServiceProvider serviceProvider = getApplicationByResourceId(resourceId, tenantDomain);
+        clearAllAppCache(serviceProvider, tenantDomain);
+
+        appDAO.deleteApplicationByResourceId(resourceId, tenantDomain);
     }
 
     private void addToCache(ServiceProvider serviceProvider, String tenantDomain) throws
@@ -336,13 +433,19 @@ public class CacheBackedApplicationDAO extends AbstractApplicationDAOImpl {
 
         ServiceProvider serviceProvider = null;
         try {
-            ApplicationMgtUtil.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            IdentityServiceProviderCacheKey cacheKey = new IdentityServiceProviderCacheKey(
-                    applicationName, tenantDomain);
-            IdentityServiceProviderCacheEntry entry = appCacheByName.getValueFromCache(cacheKey);
+            if (StringUtils.isNotBlank(applicationName)) {
+                ApplicationMgtUtil.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                IdentityServiceProviderCacheKey cacheKey = new IdentityServiceProviderCacheKey(
+                        applicationName, tenantDomain);
+                IdentityServiceProviderCacheEntry entry = appCacheByName.getValueFromCache(cacheKey);
 
-            if (entry != null) {
-                serviceProvider = entry.getServiceProvider();
+                if (entry != null) {
+                    serviceProvider = entry.getServiceProvider();
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Provided application name is empty");
+                }
             }
         } finally {
             ApplicationMgtUtil.endTenantFlow();

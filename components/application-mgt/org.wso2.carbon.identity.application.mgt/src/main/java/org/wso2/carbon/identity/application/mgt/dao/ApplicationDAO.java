@@ -59,54 +59,6 @@ public interface ApplicationDAO {
     ApplicationBasicInfo[] getAllApplicationBasicInfo() throws IdentityApplicationManagementException;
 
     /**
-     * @return
-     * @throws IdentityApplicationManagementException
-     */
-    default ApplicationBasicInfo[] getAllPaginatedApplicationBasicInfo(int pageNumber) throws IdentityApplicationManagementException {
-        return new ApplicationBasicInfo[0];
-    }
-
-    /**
-     * Get all paginated basic application information for a matching filter.
-     *
-     * @return
-     * @throws IdentityApplicationManagementException
-     */
-    default ApplicationBasicInfo[] getPaginatedApplicationBasicInfo(int pageNumber, String filter) throws IdentityApplicationManagementException {
-        return new ApplicationBasicInfo[0];
-    }
-
-    /**
-     * Get count of applications for user
-     *
-     * @return
-     * @throws IdentityApplicationManagementException
-     */
-    default int getCountOfAllApplications() throws IdentityApplicationManagementException {
-        return 0;
-    }
-
-    /**
-     * Get count of applications for user which has the filter string
-     *
-     * @param filter
-     * @return
-     * @throws IdentityApplicationManagementException
-     */
-    default int getCountOfApplications(String filter) throws IdentityApplicationManagementException {
-        return 0;
-    }
-
-    /**
-     * Get all basic application information for a matching filter.
-     *
-     * @param filter Application name filter
-     * @return Application Basic Information array
-     * @throws IdentityApplicationManagementException
-     */
-    ApplicationBasicInfo[] getApplicationBasicInfo(String filter) throws IdentityApplicationManagementException;
-
-    /**
      * @param applicationDTO
      * @throws IdentityApplicationManagementException
      */
@@ -178,5 +130,33 @@ public interface ApplicationDAO {
     default boolean isApplicationExists(String serviceProviderName, String tenantName) throws IdentityApplicationManagementException {
 
         return false;
+    }
+
+    default ApplicationBasicInfo getApplicationBasicInfoByResourceId(String resourceId, String tenantDomain)
+            throws IdentityApplicationManagementException {
+
+        return null;
+    }
+
+    default ServiceProvider addApplication(ServiceProvider application, String tenantDomain)
+            throws IdentityApplicationManagementException {
+
+        return null;
+    }
+
+    default ServiceProvider getApplicationByResourceId(String resourceId, String tenantDomain)
+            throws IdentityApplicationManagementException {
+
+        return null;
+    }
+
+    default void updateApplicationByResourceId(String resourceId, String tenantDomain, ServiceProvider updatedApp)
+            throws IdentityApplicationManagementException {
+
+    }
+
+    default void deleteApplicationByResourceId(String resourceId, String tenantDomain)
+            throws IdentityApplicationManagementException {
+
     }
 }
