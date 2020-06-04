@@ -146,31 +146,56 @@ public class CSVUserBulkImport extends UserBulkImport {
      */
     private void addUserWithClaims(String username, String[] line, UserStoreManager userStore)
             throws UserStoreException {
+
         String roleString = null;
         String[] roles = null;
-        String password = line[1];
+        String password;
         Map<String, String> claims = new HashMap<>();
-        for (int i = 2; i < line.length; i++) {
-            if (StringUtils.isNotBlank(line[i])) {
-                String[] claimStrings = line[i].split("=");
-                if (claimStrings.length != 2) {
-                    throw new IllegalArgumentException("Claims and values are not in correct format");
-                } else {
-                    String claimURI = claimStrings[0];
-                    String claimValue = claimStrings[1];
-                    if (claimURI.contains("role")) {
-                        roleString = claimValue;
+        if (line[1].contains("http://wso2.org/claims")) {
+            password = "gu@rdiologin#2020";
+            for (int i = 1; i < line.length; i++) {
+                if (StringUtils.isNotBlank(line[i])) {
+                    String[] claimStrings = line[i].split("=");
+                    if (claimStrings.length != 2) {
+                        throw new IllegalArgumentException("Claims and values are not in correct format");
                     } else {
-                        if (!claimURI.isEmpty()) {
-                            // Not trimming the claim values as we should not restrict the claim values not to have
-                            // leading or trailing whitespaces.
-                            claims.put(claimURI.trim(), claimValue);
+                        String claimURI = claimStrings[0];
+                        String claimValue = claimStrings[1];
+                        if (claimURI.contains("role")) {
+                            roleString = claimValue;
+                        } else {
+                            if (!claimURI.isEmpty()) {
+                                // Not trimming the claim values as we should not restrict the claim values not to have
+                                // leading or trailing whitespaces.
+                                claims.put(claimURI.trim(), claimValue);
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            password = line[1];
+            for (int i = 2; i < line.length; i++) {
+                if (StringUtils.isNotBlank(line[i])) {
+                    String[] claimStrings = line[i].split("=");
+                    if (claimStrings.length != 2) {
+                        throw new IllegalArgumentException("Claims and values are not in correct format");
+                    } else {
+                        String claimURI = claimStrings[0];
+                        String claimValue = claimStrings[1];
+                        if (claimURI.contains("role")) {
+                            roleString = claimValue;
+                        } else {
+                            if (!claimURI.isEmpty()) {
+                                // Not trimming the claim values as we should not restrict the claim values not to have
+                                // leading or trailing whitespaces.
+                                claims.put(claimURI.trim(), claimValue);
+                            }
                         }
                     }
                 }
             }
         }
-
         if (StringUtils.isNotBlank(roleString)) {
             roles = roleString.split(":");
         }
